@@ -1,0 +1,38 @@
+{
+    "courses": [
+      {
+        "course_id": "AMS_310",
+        "priority": 5,
+        "sections": [
+          {
+            "section_id": "01",
+            "meetings": [
+              { "day": "Mon", "start": 10.0, "end": 11.25 },
+              { "day": "Wed", "start": 10.0, "end": 11.25 }
+            ]
+          },
+          {
+            "section_id": "02",
+            "meetings": [
+              { "day": "Tue", "start": 14.0, "end": 15.25 },
+              { "day": "Thu", "start": 14.0, "end": 15.25 }
+            ]
+          }
+        ]
+      },
+      {
+        "course_id": "CS_220",
+        "priority": 4,
+        "sections": [
+          {
+            "section_id": "01",
+            "meetings": [
+              { "day": "Mon", "start": 13.0, "end": 14.25 },
+              { "day": "Wed", "start": 13.0, "end": 14.25 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  
