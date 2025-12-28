@@ -10,7 +10,7 @@ body {
 }
 
 header {
-    background: #4CAF50;
+    background: #7ba3c0;
     color: white;
     text-align: center;
     padding: 2rem 1rem;
@@ -34,7 +34,7 @@ section {
 }
 
 section h2 {
-    color: #4CAF50;
+    color: #7ba3c0;
 }
 
 ul {
@@ -57,7 +57,7 @@ footer {
 }
 
 footer a {
-    color: #4CAF50;
+    color: #7ba3c0;
     text-decoration: none;
 }
 

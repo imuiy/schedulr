@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Schedulr</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Schedulr</h1>
+    <form method="POST">
+        <div id="courses">
+            <div class="course">
+                <input type="text" name="course[]" placeholder="Course name">
+                <input type="text" name="section[]" placeholder="Section info">
+            </div>
+        </div>
+        <button type="button" onclick="addCourse()">Add another course</button>
+        <button type="submit">Generate Schedules</button>
+    </form>
+
+    {% if schedules %}
+        <h2>Generated Schedules</h2>
+        {% for schedule in schedules %}
+            <pre>{{ schedule }}</pre>
+        {% endfor %}
+    {% endif %}
+
+    <script>
+    function addCourse() {
+        const div = document.createElement("div");
+        div.className = "course";
+        div.innerHTML = '<input type="text" name="course[]" placeholder="Course name"> <input type="text" name="section[]" placeholder="Section info">';
+        document.getElementById("courses").appendChild(div);
+    }
+    </script>
+</body>
+</html>
