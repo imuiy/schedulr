@@ -1,4 +1,23 @@
 from schedulr.constraints import sections_overlap
+from enum import Enum
+
+class Faculty(Enum):
+    KSAS = "ksas"
+    EN = "engineering"
+
+class ScheduleConstraints:
+    """Credit limit constratint for diff faculties"""
+
+    CREDIT_LIMITS = {
+        Faculty.KSAS:{
+            'normal': 19.0,
+            'overload' : 19.0, #ksas doesnt allow overload
+        },
+        Faculty.EN:{
+            'normal' : 19.5,
+            'overload' : 23.5, 
+        }
+    }
 
 def generate_schedules(courses, max_schedules=5):
     results = []
