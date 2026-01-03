@@ -70,6 +70,9 @@
         .empty-state { text-align: center; padding: 40px; color: #999; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
         .badge-sections { background: #e3f2fd; color: #1976D2; }
+        .badge-credits { background: #e8f5e9; color: #388E3C; margin-left: 5px; }
+        
+        .credit-summary { padding: 15px; background: #e3f2fd; border-radius: 6px; font-weight: 600; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -93,7 +96,29 @@
                     <div class="selected-courses" id="selected-courses">
                         <div class="empty-state">Click courses on the left to add them</div>
                     </div>
+                    <div class="credit-summary" id="credit-summary">
+                        Selected: <span id="selected-credits">0</span> credits
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <h2 style="margin-bottom: 20px;">⚙️ Credit Constraints</h2>
+            
+            <div style="margin-bottom: 15px;">
+                <label>Faculty/School:</label>
+                <select id="faculty" onchange="updateOverloadOption()">
+                    <option value="ksas">Krieger School of Arts & Sciences (19 credits max)</option>
+                    <option value="engineering">Engineering (19.5 credits normal, can overload to 23.5)</option>
+                </select>
+            </div>
+            
+            <div id="overload-option" style="display: none; margin-bottom: 15px;">
+                <label>
+                    <input type="checkbox" id="allow-overload">
+                    Allow overload (up to 23.5 credits)
+                </label>
             </div>
         </div>
 
@@ -126,10 +151,11 @@
     </div>
 
     <script>
-        // Course database - this would normally come from a JSON file or API
+        // Course database with credits
         const courseDatabase = {
             'CS101': {
                 title: 'Introduction to Computer Science',
+                credits: 3.0,
                 sections: {
                     'L01': [
                         { day: 'Monday', start: '09:00', end: '10:30' },
@@ -144,6 +170,7 @@
             },
             'CS201': {
                 title: 'Data Structures and Algorithms',
+                credits: 3.0,
                 sections: {
                     'A01': [
                         { day: 'Monday', start: '13:00', end: '14:30' },
@@ -157,6 +184,7 @@
             },
             'MTH101': {
                 title: 'Calculus I',
+                credits: 4.0,
                 sections: {
                     'L01': [
                         { day: 'Monday', start: '11:00', end: '12:30' },
@@ -172,6 +200,7 @@
             },
             'PHY101': {
                 title: 'Physics I',
+                credits: 4.0,
                 sections: {
                     'P01': [
                         { day: 'Tuesday', start: '13:00', end: '15:00' },
@@ -185,6 +214,7 @@
             },
             'ENG101': {
                 title: 'English Composition',
+                credits: 3.0,
                 sections: {
                     'E01': [{ day: 'Monday', start: '12:00', end: '13:30' }],
                     'E02': [{ day: 'Tuesday', start: '11:00', end: '12:30' }],
@@ -193,6 +223,7 @@
             },
             'ELEC201': {
                 title: 'Circuits and Electronics',
+                credits: 3.0,
                 sections: {
                     'X01': [{ day: 'Friday', start: '14:00', end: '15:30' }],
                     'X02': [{ day: 'Tuesday', start: '16:00', end: '17:30' }],
@@ -227,7 +258,10 @@
                                 <div class="course-code">${code}</div>
                                 <div class="course-title">${course.title}</div>
                             </div>
-                            <span class="badge badge-sections">${sectionCount} sections</span>
+                            <div>
+                                <span class="badge badge-credits">${course.credits} credits</span>
+                                <span class="badge badge-sections">${sectionCount} sections</span>
+                            </div>
                         </div>
                         <div class="section-info">
                             ${Object.keys(course.sections).join(', ')}
@@ -255,6 +289,13 @@
             const count = Object.keys(selectedCourses).length;
             document.getElementById('selected-count').textContent = count;
             
+            // Calculate total credits
+            let totalCredits = 0;
+            for (const code of Object.keys(selectedCourses)) {
+                totalCredits += courseDatabase[code].credits;
+            }
+            document.getElementById('selected-credits').textContent = totalCredits.toFixed(1);
+            
             if (count === 0) {
                 container.innerHTML = '<div class="empty-state">Click courses on the left to add them</div>';
                 return;
@@ -267,7 +308,7 @@
                     <div class="selected-course-item">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <div style="font-weight: 600; margin-bottom: 4px;">${code}</div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">${code} <span class="badge badge-credits">${course.credits} credits</span></div>
                                 <div style="font-size: 13px; color: #666;">${course.title}</div>
                             </div>
                             <button class="danger small" onclick="removeCourse('${code}')">Remove</button>
@@ -293,6 +334,12 @@
 
         function updatePriority(code, priority) {
             selectedCourses[code].priority = parseInt(priority);
+        }
+
+        function updateOverloadOption() {
+            const faculty = document.getElementById('faculty').value;
+            const overloadDiv = document.getElementById('overload-option');
+            overloadDiv.style.display = faculty === 'engineering' ? 'block' : 'none';
         }
 
         function filterCourses() {
@@ -345,7 +392,8 @@
                 coursesArray.push({
                     name: code,
                     priority: data.priority,
-                    sections: sections
+                    sections: sections,
+                    credits: course.credits
                 });
             }
 
@@ -363,11 +411,19 @@
             });
 
             const maxSchedules = parseInt(document.getElementById('max-schedules').value);
+            const faculty = document.getElementById('faculty').value;
+            const allowOverload = document.getElementById('allow-overload').checked;
 
             fetch('/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courses: coursesArray, blockedTimes, maxSchedules })
+                body: JSON.stringify({ 
+                    courses: coursesArray, 
+                    blockedTimes, 
+                    maxSchedules,
+                    faculty: faculty,
+                    allowOverload: allowOverload
+                })
             })
             .then(r => r.json())
             .then(data => {
@@ -387,7 +443,7 @@
             const container = document.getElementById('results-container');
             
             if (data.count === 0) {
-                container.innerHTML = '<div class="input-section"><h2>No valid schedules found! Try adjusting priorities or removing time blocks.</h2></div>';
+                container.innerHTML = '<div class="input-section"><h2>No valid schedules found! Try adjusting priorities, allowing overload, or removing time blocks.</h2></div>';
                 return;
             }
 
@@ -401,14 +457,20 @@
 
             let html = `<div class="input-section"><h2>Found ${data.count} Valid Schedule(s)</h2></div><div class="results">`;
             
-            data.schedules.forEach((schedule, scheduleIdx) => {
+            data.schedules.forEach((scheduleData, scheduleIdx) => {
+                const schedule = scheduleData.sections;
+                const totalCredits = scheduleData.total_credits;
+                
                 const courseColors = {};
                 schedule.forEach((course, idx) => {
                     courseColors[course.course] = COLORS[idx % COLORS.length];
                 });
 
                 html += `<div class="schedule-card">
-                    <div class="schedule-header">Schedule ${scheduleIdx + 1}</div>
+                    <div class="schedule-header">
+                        Schedule ${scheduleIdx + 1}
+                        ${totalCredits ? `<span style="float: right; background: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 14px;">${totalCredits.toFixed(1)} credits</span>` : ''}
+                    </div>
                     <div class="schedule-grid">
                         <div class="time-column">
                             <div style="height: 42px;"></div>`;
@@ -461,7 +523,7 @@
                     const color = courseColors[course.course];
                     html += `<div class="color-legend">
                         <div class="color-box" style="background: ${color.bg}; border-color: ${color.border};"></div>
-                        <span>${course.course} (${course.section})</span>
+                        <span>${course.course} (${course.section}) - ${course.credits} credits</span>
                     </div>`;
                 });
                 html += `</div></div>`;

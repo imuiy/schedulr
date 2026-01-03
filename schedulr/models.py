@@ -13,11 +13,11 @@ class Section:
 
 
 class Course:
-    def __init__(self, course_id, priority, sections):
+    def __init__(self, course_id, priority, sections, credits=3.0):  # ADD credits=3.0 HERE
         self.course_id = course_id
         self.priority = priority
         self.sections = sections
-        self.credits = credits
+        self.credits = credits  # This was trying to use 'credits' before it was passed in
 
         for section in sections:
             section.course = self

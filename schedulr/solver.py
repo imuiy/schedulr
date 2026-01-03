@@ -28,7 +28,7 @@ class ScheduleConstraints:
         limits = self.CREDIT_LIMITS[self.faculty]
         return limits['overload'] if self.overloaded else limits['normal']
     
-    def is_valid_credit_load(self, total_creidts):
+    def is_valid_credit_load(self, total_credits):
         return total_credits <= self.max_credits
 
 def generate_schedules(courses, max_schedules=5, blocked_times = None, constraints = None):
@@ -75,7 +75,7 @@ def generate_schedules(courses, max_schedules=5, blocked_times = None, constrain
                 current.append(section)
                 backtrack(i + 1, current)
                 current.pop()
-                
+
         backtrack(i+1, current)
 
     backtrack(0, [])
